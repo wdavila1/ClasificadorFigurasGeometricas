@@ -247,7 +247,7 @@ El sistema genera automáticamente:
 
 ## 🤝 Autor
 
-Proyecto desarrollado como demostración de clasificación de figuras geométricas usando redes neuronales.
+Proyecto desarrollado por Wilson Avilacomo demostración de clasificación de figuras geométricas usando redes neuronales.
 
 ## 📝 Notas
 
