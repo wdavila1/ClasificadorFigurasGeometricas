@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificador de Figuras Geométricas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #10b981;
+            --background: #f8fafc;
+            --card-bg: #ffffff;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container-main {
+            padding: 2rem 0;
+        }
+        
+        .card-custom {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            border: none;
+        }
+        
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem 1rem 0 0;
+            text-align: center;
+        }
+        
+        .header-section h1 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-zone {
+            border: 3px dashed #cbd5e1;
+            border-radius: 1rem;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: #f8fafc;
+        }
+        
+        .upload-zone:hover {
+            border-color: var(--primary-color);
+            background: #f1f5f9;
+        }
+        
+        .upload-zone.dragover {
+            border-color: var(--secondary-color);
+            background: #ecfdf5;
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-primary-custom {
+            background: var(--primary-color);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary-custom:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+        
+        .resultado-section {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: #f8fafc;
+            border-radius: 1rem;
+        }
+        
+        .resultado-titulo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .confianza-badge {
+            font-size: 1.25rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        
+        .probabilidad-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .progress-custom {
+            height: 1.5rem;
+            border-radius: 0.5rem;
+        }
+        
+        .caracteristicas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .caracteristica-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .caracteristica-valor {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .spinner-border-custom {
+            width: 3rem;
+            height: 3rem;
+            color: var(--primary-color);
+        }
+        
+        .alert-custom {
+            border-radius: 0.5rem;
+            border: none;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container container-main">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="card card-custom">
+                    <div class="header-section">
+                        <h1><i class="bi bi-pentagon"></i> Clasificador de Figuras Geométricas</h1>
+                        <p class="mb-0">Sube una imagen y descubre qué figura es usando Inteligencia Artificial</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <!-- Zona de subida -->
+                        <div class="upload-zone" id="uploadZone">
+                            <i class="bi bi-cloud-upload upload-icon"></i>
+                            <h4>Arrastra una imagen aquí</h4>
+                            <p class="text-muted">o haz clic para seleccionar</p>
+                            <input type="file" id="inputImagen" accept="image/png,image/jpeg,image/jpg" style="display: none;">
+                            <button class="btn btn-primary-custom mt-3" onclick="document.getElementById('inputImagen').click()">
+                                <i class="bi bi-upload"></i> Seleccionar Imagen
+                            </button>
+                        </div>
+                        
+                        <!-- Preview de imagen -->
+                        <div id="previewContainer" class="text-center" style="display: none;">
+                            <img id="previewImage" class="preview-image" alt="Vista previa">
+                            <div class="mt-3">
+                                <button class="btn btn-primary-custom" id="btnClasificar">
+                                    <i class="bi bi-cpu"></i> Clasificar Figura
+                                </button>
+                                <button class="btn btn-secondary" onclick="resetear()">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Nueva Imagen
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Loading -->
+                        <div id="loadingContainer" class="text-center mt-4" style="display: none;">
+                            <div class="spinner-border spinner-border-custom" role="status">
+                                <span class="visually-hidden">Clasificando...</span>
+                            </div>
+                            <p class="mt-3 text-muted">Analizando la imagen...</p>
+                        </div>
+                        
+                        <!-- Resultados -->
+                        <div id="resultadoContainer" style="display: none;">
+                            <div class="resultado-section">
+                                <h3 class="text-center mb-4">
+                                    <i class="bi bi-check-circle-fill text-success"></i> Resultado de la Clasificación
+                                </h3>
+                                
+                                <div class="text-center">
+                                    <div class="resultado-titulo" id="clasePredicha"></div>
+                                    <span class="badge bg-success confianza-badge" id="confianza"></span>
+                                </div>
+                                
+                                <h5 class="mt-4 mb-3">Probabilidades por Clase:</h5>
+                                <div id="probabilidadesContainer"></div>
+                                
+                                <h5 class="mt-4 mb-3">Características Extraídas:</h5>
+                                <div class="caracteristicas-grid" id="caracteristicasContainer"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Error -->
+                        <div id="errorContainer" style="display: none;">
+                            <div class="alert alert-danger alert-custom" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <strong>Error:</strong> <span id="errorMensaje"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Instrucciones -->
+                <div class="card card-custom mt-4">
+                    <div class="card-body">
+                        <h5><i class="bi bi-info-circle"></i> Cómo funciona</h5>
+                        <ol class="mb-0">
+                            <li>Sube una imagen que contenga un <strong>círculo</strong>, <strong>cuadrado</strong> o <strong>triángulo</strong></li>
+                            <li>El sistema extrae características geométricas automáticamente</li>
+                            <li>Una red neuronal clasifica la figura basándose en esas características</li>
+                            <li>Obtienes el resultado con el nivel de confianza y probabilidades</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let archivoSeleccionado = null;
+        
+        // Elementos del DOM
+        const uploadZone = document.getElementById('uploadZone');
+        const inputImagen = document.getElementById('inputImagen');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const btnClasificar = document.getElementById('btnClasificar');
+        const loadingContainer = document.getElementById('loadingContainer');
+        const resultadoContainer = document.getElementById('resultadoContainer');
+        const errorContainer = document.getElementById('errorContainer');
+        
+        // Drag & Drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const archivos = e.dataTransfer.files;
+            if (archivos.length > 0) {
+                manejarArchivo(archivos[0]);
+            }
+        });
+        
+        // Input file change
+        inputImagen.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                manejarArchivo(e.target.files[0]);
+            }
+        });
+        
+        // Botón clasificar
+        btnClasificar.addEventListener('click', clasificarImagen);
+        
+        function manejarArchivo(archivo) {
+            // Validar tipo de archivo
+            if (!archivo.type.match('image/(png|jpeg|jpg)')) {
+                mostrarError('Por favor selecciona una imagen PNG, JPG o JPEG');
+                return;
+            }
+            
+            archivoSeleccionado = archivo;
+            
+            // Mostrar preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                uploadZone.style.display = 'none';
+                previewContainer.style.display = 'block';
+                errorContainer.style.display = 'none';
+                resultadoContainer.style.display = 'none';
+            };
+            reader.readAsDataURL(archivo);
+        }
+        
+        async function clasificarImagen() {
+            if (!archivoSeleccionado) return;
+            
+            // Ocultar resultados previos y mostrar loading
+            resultadoContainer.style.display = 'none';
+            errorContainer.style.display = 'none';
+            loadingContainer.style.display = 'block';
+            btnClasificar.disabled = true;
+            
+            // Crear FormData
+            const formData = new FormData();
+            formData.append('imagen', archivoSeleccionado);
+            
+            try {
+                const response = await fetch('/clasificar', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    mostrarResultado(data);
+                } else {
+                    mostrarError(data.error || 'Error al clasificar la imagen');
+                }
+            } catch (error) {
+                mostrarError('Error de conexión: ' + error.message);
+            } finally {
+                loadingContainer.style.display = 'none';
+                btnClasificar.disabled = false;
+            }
+        }
+        
+        function mostrarResultado(data) {
+            // Clase predicha
+            document.getElementById('clasePredicha').textContent = 
+                data.clase_predicha.charAt(0).toUpperCase() + data.clase_predicha.slice(1);
+            
+            // Confianza
+            document.getElementById('confianza').textContent = 
+                `Confianza: ${data.confianza}%`;
+            
+            // Probabilidades
+            const probabilidadesHTML = Object.entries(data.probabilidades)
+                .sort((a, b) => b[1] - a[1])
+                .map(([clase, prob]) => `
+                    <div class="probabilidad-item">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong>${clase.charAt(0).toUpperCase() + clase.slice(1)}</strong>
+                            <span>${prob}%</span>
+                        </div>
+                        <div class="progress progress-custom">
+                            <div class="progress-bar bg-primary" role="progressbar" 
+                                 style="width: ${prob}%" aria-valuenow="${prob}" 
+                                 aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                `).join('');
+            document.getElementById('probabilidadesContainer').innerHTML = probabilidadesHTML;
+            
+            // Características
+            const caracteristicasHTML = `
+                <div class="caracteristica-card">
+                    <div class="caracteristica-valor">${data.caracteristicas.numero_lados}</div>
+                    <small class="text-muted">Número de Lados</small>
+                </div>
+                <div class="caracteristica-card">
+                    <div class="caracteristica-valor">${data.caracteristicas.proporcion_ancho_alto.toFixed(2)}</div>
+                    <small class="text-muted">Proporción Ancho/Alto</small>
+                </div>
+                <div class="caracteristica-card">
+                    <div class="caracteristica-valor">${data.caracteristicas.perimetro.toFixed(1)}</div>
+                    <small class="text-muted">Perímetro</small>
+                </div>
+                <div class="caracteristica-card">
+                    <div class="caracteristica-valor">${data.caracteristicas.area.toFixed(1)}</div>
+                    <small class="text-muted">Área</small>
+                </div>
+                <div class="caracteristica-card">
+                    <div class="caracteristica-valor">${data.caracteristicas.compacidad.toFixed(3)}</div>
+                    <small class="text-muted">Compacidad</small>
+                </div>
+            `;
+            document.getElementById('caracteristicasContainer').innerHTML = caracteristicasHTML;
+            
+            resultadoContainer.style.display = 'block';
+        }
+        
+        function mostrarError(mensaje) {
+            document.getElementById('errorMensaje').textContent = mensaje;
+            errorContainer.style.display = 'block';
+            loadingContainer.style.display = 'none';
+        }
+        
+        function resetear() {
+            archivoSeleccionado = null;
+            inputImagen.value = '';
+            uploadZone.style.display = 'block';
+            previewContainer.style.display = 'none';
+            resultadoContainer.style.display = 'none';
+            errorContainer.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Dataset y modelos generados
+dataset/
+modelo/
+*.csv
+*.png
+*.jpg
+*.jpeg
+
+# Flask
+instance/
+.webassets-cache
+static/uploads/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Sistema
+.DS_Store
+Thumbs.db
